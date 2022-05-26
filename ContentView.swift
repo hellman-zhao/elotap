@@ -95,7 +95,7 @@ struct StandingsView: View {
                             }
                     }
                   } header: {
-                    Text("Players")
+                    Text("Players Ranked")
                   }
                 }
                 
@@ -176,6 +176,8 @@ struct HomeView: View {
                 .onAppear(perform: {
                     self.isNavigationBarHidden = true
                     groups=PersistenceController.shared.getallGroups()
+                    UIDevice.current.setValue(UIInterfaceOrientation.portrait.rawValue, forKey: "orientation") // Forcing the rotation to portrait
+                    AppDelegate.orientationLock = .portrait // And making sure it stays that way
                 })
                 
                 HStack {
@@ -263,7 +265,13 @@ struct CreateGroupView: View {
                     .padding(.leading)
                     Spacer()
                     Button {
-                        if(!groupName.isEmpty && numPlayers>=2 && !playerNames[0].isEmpty && !playerNames[1].isEmpty){
+                        var count=0
+                        for i in 0..<numPlayers{ //checks if filled out textfields match number of players
+                            if !playerNames[i].isEmpty{
+                                count+=1
+                            }
+                        }
+                        if(!groupName.isEmpty && numPlayers>=2 && count==numPlayers){
                             for i in 0..<playerNames.count {
                                 if (playerNames[i] != "") { //create Player entities for non empty string names
                                     let player=Player(context: moc)
@@ -279,8 +287,8 @@ struct CreateGroupView: View {
                             
                             PersistenceController.shared.saveGroup(groupName: groupName, numPlayers: Int16(numPlayers), players: players)
                             groups=PersistenceController.shared.getallGroups()
-                            print(groups[0].playerArray)
-                            print(groups[0].matchesArray) //should be empty
+//                            print(groups[0].playerArray)
+//                            print(groups[0].matchesArray)
                             presentationMode.wrappedValue.dismiss()
                         }
                     } label: {
