@@ -47,7 +47,7 @@ struct StandingsView: View {
                         for i in 0..<group.playerArray.count{
                             playerList.append(group.playerArray[i])
                         }
-                        if group.rankByWins==0{
+                        if group.rankByWins==1{
                             playerList.sort {$0.wins!.intValue > $1.wins!.intValue }
                         }
                         else{
@@ -95,7 +95,7 @@ struct StandingsView: View {
                             }
                     }
                   } header: {
-                    Text("Players Ranked")
+                    Text("Current Standings")
                   }
                 }
                 
@@ -109,7 +109,7 @@ struct StandingsView: View {
                 for i in 0..<group.playerArray.count{
                     playerList.append(group.playerArray[i])
                 }
-                if group.rankByWins==0{
+                if group.rankByWins==1{
                     playerList.sort {$0.wins!.intValue > $1.wins!.intValue }
                 }
                 else{
@@ -126,6 +126,7 @@ struct HomeView: View {
     @State private var groups: [Group] = [Group]()
     @State private var initial_message="No Groups Yet"
     @State private var showSheet=false
+    @State private var showSheet1=false
     @State var isNavigationBarHidden: Bool = true
     
     @available(iOS 15.0, *)
@@ -181,6 +182,20 @@ struct HomeView: View {
                 })
                 
                 HStack {
+                    Button {
+                        showSheet1.toggle()
+                    } label: {
+                        Image(systemName: "questionmark.circle")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .foregroundColor(Color(hue: 0.722, saturation: 0.98, brightness: 0.593))
+                            .padding(.leading, 25.0)
+                            .frame(width: 55.0, height: 55.0)
+                    }
+                    .padding(.leading)
+                    .fullScreenCover(isPresented: $showSheet1) {
+                        HelpView()
+                    }
                     Spacer()
                     Button {
                         showSheet.toggle()
@@ -279,12 +294,11 @@ struct CreateGroupView: View {
                                     player.wins=(Int16(0)) as NSNumber //change i to 0
                                     player.losses=(Int16(0)) as NSNumber
                                     player.ties=(Int16(0)) as NSNumber
-                                    player.points=(Int16(15)) as NSNumber //change i to 15
+                                    player.points=(Int16(1200)) as NSNumber //change i to 1200
                                     player.id=(Int16(i+1)) as NSNumber
                                     players.append(player)
                                 }
                             }
-                            
                             PersistenceController.shared.saveGroup(groupName: groupName, numPlayers: Int16(numPlayers), players: players)
                             groups=PersistenceController.shared.getallGroups()
 //                            print(groups[0].playerArray)
@@ -306,6 +320,80 @@ struct CreateGroupView: View {
         }
         
     }
+
+struct HelpView: View {
+    
+    @Environment(\.presentationMode) var presentationMode
+    
+    var body: some View {
+        
+        VStack{
+            
+            HStack {
+                Text("HELP & SUPPORT")
+                    .font(.system(size: 25))
+                    .fontWeight(.bold)
+                    .padding(.top, 30.0)
+                    .padding(.leading, 25.0)
+
+                Spacer()
+            }
+            .padding(.bottom, 35.0)
+            
+            VStack{
+                HStack{
+                    Text("_EloTap_ is a mobile application that ranks you and your friends based on competitive matches with one another. To start, simply create a group, and start playing some matches! You will see yourself and others move up and down the ladder based on the results of those matches.")
+                        .font(.system(size: 15))
+                    Spacer()
+                }
+                .padding(.bottom, 25.0)
+                HStack{
+                    Text("_EloTap_ ranks the players in your group by using one of two ranking systems. You can navigate between these two systems by navigating to the settings in your group page. Details for each ranking system is given below:")
+                        .font(.system(size: 15))
+                    Spacer()
+                }
+                .padding(.bottom, 10.0)
+                HStack{
+                    Text("_By Points:_ This system will rank the players in your groups by points. If you win against someone who has much more points than you, your points will go up by a higher amount than if you win against someone with the same number of points, or less points, and vice versa.")
+                        .font(.system(size: 15))
+                    Spacer()
+                }
+                .padding(.bottom, 10.0)
+                HStack{
+                    Text("_By Wins:_ This system will rank the players in your groups by wins. The more matches you win, the higher you will climb up the ladder, regardless of how many points you or others have. This system is recommended when each player is guaranteed to play the same number of matches and when each player is guaranteed to play everyone in the group.")
+                        .font(.system(size: 15))
+                    Spacer()
+                }
+                .padding(.bottom, 25.0)
+                HStack{
+                    Text("For any questions or feedback, please contact _hzhao1@swarthmore.edu_.")
+                        .font(.system(size: 15))
+                    Spacer()
+                }
+            }
+            .padding(.leading, 25.0)
+            
+            Spacer()
+            
+            HStack {
+                Button {
+                    presentationMode.wrappedValue.dismiss()
+                } label: {
+                    Image(systemName: "x.circle")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .foregroundColor(Color.black)
+                        .padding(.leading, 25.0)
+                        .frame(width: 70.0, height: 70.0)
+                }
+                .padding(.leading)
+                Spacer()
+            }
+        }
+        
+    }
+        
+}
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {

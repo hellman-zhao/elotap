@@ -166,23 +166,23 @@ struct ConfigurationView: View {
                 
               Section {
                   Button {
-                      if group.rankByWins==0{
-                          group.rankByWins=1
+                      if group.rankByWins==1{
+                          group.rankByWins=0
                           playerList.sort {$0.points!.intValue > $1.points!.intValue }
                       }
-                      else if group.rankByWins==1{
-                          group.rankByWins=0
+                      else if group.rankByWins==0{
+                          group.rankByWins=1
                           playerList.sort {$0.wins!.intValue > $1.wins!.intValue }
                       }
                       PersistenceController.shared.updateGroup()
                       presentationMode.wrappedValue.dismiss()
                   } label: {
                       Label {
-                          if group.rankByWins==0{
+                          if group.rankByWins==1{
                               Text("Rank By Points")
                                   .foregroundColor(Color.black)
                           }
-                          else if group.rankByWins==1{
+                          else if group.rankByWins==0{
                               Text("Rank By Wins")
                                   .foregroundColor(Color.black)
                           }
@@ -469,9 +469,14 @@ struct AddMatchView: View {
                 Spacer()
                 Button {
                     if(!player1Name.isEmpty && !player2Name.isEmpty){
+                        
                         group.numMatches+=1
+                        var player1Points=0
+                        var player2Points=0
+                        var increaseName=""
+                        var decreaseName=""
 
-                        if(player1Score > player2Score){
+                        if(player1Score > player2Score){ //player1 beats player2
                             let match=Match(context: moc)
                             match.winnerName=player1Name
                             match.loserName=player2Name
@@ -479,24 +484,47 @@ struct AddMatchView: View {
                             match.loserScore=(player2Score) as NSNumber
                             match.identify=(group.numMatches) as NSNumber
                             group.addToMatches(match)
-                            var loserPoints=0
-                            for player in group.playerArray{
+                            
+                            for player in group.playerArray{ //updates win/losses/ties
                                 if player.playerName==player1Name{
                                     player.wins=(player.wins!.intValue+1) as NSNumber
+                                    player1Points=player.points as! Int
                                 }
                                 if player.playerName==player2Name{
                                     player.losses=(player.losses!.intValue+1) as NSNumber
-                                    loserPoints=player.points as! Int
+                                    player2Points=player.points as! Int
                                 }
                             }
-                            for player in group.playerArray{
-                                if player.playerName==player1Name{
-                                    player.points=(player.points!.intValue+loserPoints) as NSNumber
+                            if player1Points>=player2Points{ //non-upset
+                                for player in group.playerArray{
+                                    if player.playerName==player1Name{
+                                        player.points=(player.points!.intValue+15) as NSNumber
+                                    }
+                                    if player.playerName==player2Name{
+                                        player.points=(player.points!.intValue-15) as NSNumber
+                                    }
+                                }
+                            }
+                            else if player1Points<player2Points{ //upset
+                                var loserPoints=abs(Int((player1Points-player2Points)/4)) //initialize adjustment
+                                if loserPoints<15{
+                                    loserPoints=15
+                                }
+                                else if loserPoints>75{
+                                    loserPoints=75
+                                }
+                                for player in group.playerArray{
+                                    if player.playerName==player1Name{
+                                        player.points=(player.points!.intValue+loserPoints) as NSNumber
+                                    }
+                                    if player.playerName==player2Name{
+                                        player.points=(player.points!.intValue-loserPoints) as NSNumber
+                                    }
                                 }
                             }
                         }
                         
-                        else if(player2Score > player1Score){
+                        else if(player2Score > player1Score){ //player 2 beats player 1
                             let match=Match(context: moc)
                             match.winnerName=player2Name
                             match.loserName=player1Name
@@ -504,37 +532,79 @@ struct AddMatchView: View {
                             match.loserScore=(player1Score) as NSNumber
                             match.identify=(group.numMatches) as NSNumber
                             group.addToMatches(match)
-                            var loserPoints=0
+                            
                             for player in group.playerArray{
                                 if player.playerName==player2Name{
                                     player.wins=(player.wins!.intValue+1) as NSNumber
+                                    player2Points=player.points as! Int
                                 }
                                 if player.playerName==player1Name{
                                     player.losses=(player.losses!.intValue+1) as NSNumber
-                                    loserPoints=player.points as! Int
+                                    player1Points=player.points as! Int
                                 }
                             }
-                            for player in group.playerArray{
-                                if player.playerName==player2Name{
-                                    player.points=(player.points!.intValue+loserPoints) as NSNumber
+                            if player2Points>=player1Points{ //non-upset
+                                for player in group.playerArray{
+                                    if player.playerName==player1Name{
+                                        player.points=(player.points!.intValue-15) as NSNumber
+                                    }
+                                    if player.playerName==player2Name{
+                                        player.points=(player.points!.intValue+15) as NSNumber
+                                    }
+                                }
+                            }
+                            else if player2Points<player1Points{ //upset
+                                var loserPoints=abs(Int((player1Points-player2Points)/4)) //initialize adjustment
+                                if loserPoints<15{
+                                    loserPoints=15
+                                }
+                                else if loserPoints>75{
+                                    loserPoints=75
+                                }
+                                for player in group.playerArray{
+                                    if player.playerName==player1Name{
+                                        player.points=(player.points!.intValue-loserPoints) as NSNumber
+                                    }
+                                    if player.playerName==player2Name{
+                                        player.points=(player.points!.intValue+loserPoints) as NSNumber
+                                    }
                                 }
                             }
                         }
                         
-                        else if(player1Score == player2Score){
+                        else if(player1Score == player2Score){ //draw
                             let match=Match(context: moc)
                             match.winnerName=player1Name
                             match.loserName=player2Name
-                            match.winnerScore=(player1Score) as NSNumber
+                            match.winnerScore=(player1Score) as NSNumber //does not matter who we put as winner/loser
                             match.loserScore=(player2Score) as NSNumber
                             match.identify=(group.numMatches) as NSNumber
                             group.addToMatches(match)
-                            for player in group.playerArray{
+                            
+                            for player in group.playerArray{ //updates win/losses/ties
                                 if player.playerName==player1Name{
                                     player.ties=(player.ties!.intValue+1) as NSNumber
+                                    player1Points=player.points as! Int
                                 }
                                 if player.playerName==player2Name{
                                     player.ties=(player.ties!.intValue+1) as NSNumber
+                                    player2Points=player.points as! Int
+                                }
+                            }
+                            if player1Points>player2Points{ //updates points
+                                increaseName=player2Name
+                                decreaseName=player1Name
+                            }
+                            else if player2Points>player1Points{
+                                increaseName=player1Name
+                                decreaseName=player2Name
+                            }
+                            for player in group.playerArray{
+                                if player.playerName==increaseName{
+                                    player.points=(player.points!.intValue+10) as NSNumber
+                                }
+                                if player.playerName==decreaseName{
+                                    player.points=(player.points!.intValue-10) as NSNumber
                                 }
                             }
                         }
