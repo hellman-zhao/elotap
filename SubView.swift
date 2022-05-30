@@ -325,13 +325,13 @@ struct EditPlayersView: View {
                         player.wins=(Int16(0)) as NSNumber
                         player.losses=(Int16(0)) as NSNumber
                         player.ties=(Int16(0)) as NSNumber
-                        player.points=(Int16(0)) as NSNumber
+                        player.points=(Int16(1200)) as NSNumber
                         player.id=(group.numPlayers!.intValue+25) as NSNumber
                         group.addToPlayers(player)
                         PersistenceController.shared.updateGroup()
                         
                         playerList.append(player)
-                        if group.rankByWins==0{
+                        if group.rankByWins==1{
                             playerList.sort {$0.wins!.intValue > $1.wins!.intValue }
                         }
                         else{

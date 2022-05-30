@@ -253,7 +253,7 @@ struct CreateGroupView: View {
                 
                 Form{
                     Section{
-                        TextField("Tennis Club", text: $groupName)
+                        TextField("Group Name", text: $groupName)
                     }
                     Section(header:Text("Number of Players"),footer:Text("You need at least 2 players").italic()){
                         TextField("Number of Players", value: $numPlayers, format: .number)
