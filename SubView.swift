@@ -510,9 +510,6 @@ struct AddMatchView: View {
                                 if loserPoints<15{
                                     loserPoints=15
                                 }
-                                else if loserPoints>75{
-                                    loserPoints=75
-                                }
                                 for player in group.playerArray{
                                     if player.playerName==player1Name{
                                         player.points=(player.points!.intValue+loserPoints) as NSNumber
@@ -557,9 +554,6 @@ struct AddMatchView: View {
                                 var loserPoints=abs(Int((player1Points-player2Points)/4)) //initialize adjustment
                                 if loserPoints<15{
                                     loserPoints=15
-                                }
-                                else if loserPoints>75{
-                                    loserPoints=75
                                 }
                                 for player in group.playerArray{
                                     if player.playerName==player1Name{
